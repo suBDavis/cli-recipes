@@ -1,4 +1,4 @@
-import recipes
+from recipes import Recipes
 
 import argparse
 import sys
