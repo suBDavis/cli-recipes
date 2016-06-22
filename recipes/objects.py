@@ -1,20 +1,23 @@
 from . import utils
 
 import sys
-
-class recipe_object(object):
-
-    def __init__(self):
-        pass
+import os
+import logging
 
 
-class Recipe(recipe_object):
+class recipes_object(object):
 
     def __init__(self):
         pass
 
 
-class Note(recipe_object):
+class Recipe(recipes_object):
+
+    def __init__(self):
+        pass
+
+
+class Note(recipes_object):
 
     def __init__(self):
         pass
@@ -22,36 +25,43 @@ class Note(recipe_object):
 
 class RecipesAPI(object):
     
-    def __init__(self):
-        pass
+    def __init__(self, rfile_path):
+        self.rfile_path = rfile_path
 
 
 class LinuxRecipesAPI(RecipesAPI):
 
-    def __init__(self):
-        pass
+    def __init__(self, rfile_path):
+        super(LinuxRecipesAPI, self).__init__(rfile_path)
 
 
 class MacOSRecipesAPI(RecipesAPI):
 
     def __init__(self):
-        pass
+        super(MacOSRecipesAPI, self).__init__(rfile_path)
 
 
 class WindowsRecipesAPI(RecipesAPI):
 
     def __init__(self):
-        pass
+        super(WindowsRecipesAPI, self).__init__(rfile_path)
 
+
+_platform_apis = {
+    'Windows': WindowsRecipesAPI,
+    'MacOS': MacOSRecipesAPI,
+    'Linux': LinuxRecipesAPI,
+}
 
 def RecipesAPIFactory():
     """
     :returns: An OS-specific instance of RecipesAPI
     """
-    if sys.platform == "win32":
-        return WindowsRecipesAPI()
-    elif sys.platform == "darwin":
-        return MacOSRecipesAPI()
-    else:
-        # Linux, Cygwin, etc.
-        return LinuxRecipesAPI()
+    logger = logging.getLogger("recipes")
+
+    homedir = os.path.expanduser('~')
+    rfile_path = os.path.join(homedir, ".recipes")
+    platform = utils.get_platform(rfile_path)
+    
+    if platform:
+        return _platform_apis[platform](rfile_path)
