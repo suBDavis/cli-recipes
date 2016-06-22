@@ -1,5 +1,11 @@
 import recipes
 
+import argparse
+import sys
+
+
+def parse_args(args):
+    print(args)
 
 def main():
-    print("registered")
+    parse_args(sys.argv[1:])
