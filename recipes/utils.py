@@ -1,53 +1,57 @@
+from . import objects
+
 import logging
 import sys
 import os
+import json
+import ntpath
 
 _comment_char = '#'
+_logger = logging.getLogger("recipes")
+
 
 def export_to_rfile():
     pass
 
-def get_platform(rfile_path):
 
-    logger = logging.getLogger("recipes")
-
-    try:
-        with open(rfile_path, 'r') as rfile:
-            platform = get_platform_from_rfile(rfile)
-    except FileNotFoundError:
-        platform = (
-            "Windows" if sys.platform == "win32" else
-            "MacOS" if sys.platform == "darwin" else
-            "Linux")
-        print("Your platform was determined as %s" % platform)
-        print("Other options are:"
-              "\n1) Windows"
-              "\n2) MacOS"
-              "\n3) linux"
-              "\nEnter a number to contine, or press enter to accept defaults.")
-        key = input()
-        if len(key) == 1:
-            platform = (
-                "Windows" if key is "1" else
-                "MacOS" if key is "2" else
-                "Linux")
-        print("Platform Selected: %s" % platform)
-    except Exception as e:
-        logger.error("Unexpected Exception %s" % e)
-        exit(1)
-
-    return platform
-
-
-def get_platform_from_rfile(file):
-    for line in rfile.readline():
-        if not is_comment(line):
-            print(line)
-
-
-def is_comment(line_string):
-    line_string = line_string.trim()
-    if line_string[0] is comment_char:
-        return true
+def load_from_config(rfile_path):
+    if os.path.exists(rfile_path):
+        try:
+            rfile = open(rfile_path, 'r')
+        except:
+            _logger.error("Could not read from %s" % rfile_path)
+        with rfile:
+            return parse_rfile_json_header(rfile)
     else:
-        return false
+        initialize_rfile(rfile_path)
+        return load_from_config(rfile_path)
+
+
+def parse_rfile_json_header(rfile):
+    json_string = ""
+    
+        clean_line = line.strip()
+        if len(clean_line) is not 0:
+            if clean_line[0] is _comment_char:
+                break
+            json_string += clean_line
+    return json.loads(json_string)   
+
+
+def initialize_rfile(rfile_path, platform="linux", shell="bash"):
+    try:
+        shell = ntpath.basename(os.environ['SHELL'])
+    except:
+        pass
+
+    rfile_contents = {
+        "platform": platform,
+        "shell": shell.lower()
+    }
+    with open(rfile_path, 'w') as rfile:
+        rfile.write(json.dumps(rfile_contents))
+
+def get_aliases_from_config(rfile_path):
+    aliases_list = []
+    with open(rfile_path, 'r') as rfile:
+        for line in rfile.readline():

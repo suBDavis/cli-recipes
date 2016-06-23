@@ -1,2 +1,1 @@
-from recipes.objects import RecipesAPIFactory
-Recipes = RecipesAPIFactory()
+from recipes.apis import RecipesAPIFactory as RecipesAPI
